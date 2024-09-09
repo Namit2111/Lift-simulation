@@ -23,7 +23,7 @@ class Queue {
   }
 
   peek() {
-    return this.items[this.items.length - 1];
+    return this.items[0]; // Updated to peek the first element
   }
 
   isEmpty() {
@@ -38,6 +38,9 @@ class Queue {
     this.items = [];
   }
 }
+
+// Track active requests to avoid duplicate dispatches
+let activeRequests = new Set();
 
 /**
  *
@@ -90,14 +93,22 @@ function getClosestEmptyLift(destFloor) {
 
 const getMaxLifts = () => {
   const viewportwidth = document.getElementsByTagName("body")[0].clientWidth;
-  return Math.floor(((viewportwidth - 100)/120));
+  return Math.floor(((viewportwidth - 100) / 120));
 };
 
 const callLift = () => {
-  const { lift, index } = getClosestEmptyLift(requests.peek());
+  const destFloor = requests.peek();
+  const liftAtDestination = lifts.some(lift => lift.currFloor === destFloor);
+  if (activeRequests.has(destFloor || liftAtDestination)) {
+    // Don't dispatch a lift if one is already going to the requested floor
+    return;
+  }
+
+  const { lift, index } = getClosestEmptyLift(destFloor);
 
   if (index >= 0) {
     lifts[index].busy = true;
+    activeRequests.add(destFloor); // Mark the floor as being served
     moveLift(lift.htmlEl, requests.dequeue(), index);
   }
 };
@@ -114,7 +125,7 @@ const openLift = (index) => {
   leftDoors[index].classList.add("left-door-open");
 
   rightDoors[index].classList.remove("right-door-close");
-  leftDoors[index].classList.remove("left-door-close");
+  leftDoors[index].classList.remove("right-door-close");
 };
 
 const closeLift = (index) => {
@@ -127,6 +138,7 @@ const closeLift = (index) => {
 
   setTimeout(() => {
     lifts[index].busy = false;
+    activeRequests.delete(lifts[index].currFloor); // Remove the floor from active requests
     dispatchliftIdle();
   }, 2500);
 };
@@ -159,8 +171,11 @@ const moveLift = (lift, destFloor, index) => {
  */
 
 function addRequest(destFloor) {
-  requests.enqueue(destFloor);
-  dispatchRequestAdded();
+  // Only add the request if it's not already in the queue and not being served
+  if (!activeRequests.has(destFloor)) {
+    requests.enqueue(destFloor);
+    dispatchRequestAdded();
+  }
 }
 
 function removeRequest() {
@@ -215,10 +230,10 @@ function addLift() {
   leftDoors = document.querySelectorAll(".left-door");
   rightDoors = document.querySelectorAll(".right-door");
 
-  if(lifts.length >= getMaxLifts()) {
+  if (lifts.length >= getMaxLifts()) {
     console.log("Max lifts added");
     addLiftBtn.disabled = true;
-    addLiftBtn.textContent = "Max lifts added"
+    addLiftBtn.textContent = "Max lifts added";
     return;
   }
 }
@@ -273,8 +288,6 @@ function addCallLiftListeners(buttons) {
     });
   }
 }
-
-
 
 let requests = new Queue();
 
