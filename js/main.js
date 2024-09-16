@@ -121,19 +121,20 @@ const callLift = () => {
  */
 const openLift = (index) => {
   buttons.disabled = true;
+  
+  rightDoors[index].classList.remove("right-door-close");
+  leftDoors[index].classList.remove("left-door-close");
   rightDoors[index].classList.add("right-door-open");
   leftDoors[index].classList.add("left-door-open");
-
-  rightDoors[index].classList.remove("right-door-close");
-  leftDoors[index].classList.remove("right-door-close");
 };
 
 const closeLift = (index) => {
+  
+  rightDoors[index].classList.remove("right-door-open");
+  leftDoors[index].classList.remove("left-door-open");
   rightDoors[index].classList.add("right-door-close");
   leftDoors[index].classList.add("left-door-close");
 
-  rightDoors[index].classList.remove("right-door-open");
-  leftDoors[index].classList.remove("left-door-open");
   buttons.disabled = false;
 
   setTimeout(() => {
@@ -142,6 +143,7 @@ const closeLift = (index) => {
     dispatchliftIdle();
   }, 2500);
 };
+
 
 const openCloseLift = (index) => {
   openLift(index);
@@ -230,12 +232,12 @@ function addLift() {
   leftDoors = document.querySelectorAll(".left-door");
   rightDoors = document.querySelectorAll(".right-door");
 
-  if (lifts.length >= getMaxLifts()) {
-    console.log("Max lifts added");
-    addLiftBtn.disabled = true;
-    addLiftBtn.textContent = "Max lifts added";
-    return;
-  }
+  // if (lifts.length >= getMaxLifts()) {
+  //   console.log("Max lifts added");
+  //   addLiftBtn.disabled = true;
+  //   addLiftBtn.textContent = "Max lifts added";
+  //   return;
+  // }
 }
 
 function getLiftEl() {
