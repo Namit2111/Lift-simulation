@@ -293,6 +293,25 @@ function addCallLiftListeners(buttons) {
 
 let requests = new Queue();
 
+document.querySelector("form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  // const { numLifts, numFloors } = e.target.elements;
+  // console.log(numLifts, numFloors);
+  const numLifts = document.getElementById("num-lifts").value;  // Get number of lifts
+  const numFloors = document.getElementById("num-floors").value; 
+  console.log(numLifts, numFloors);
+  document.querySelector(".screen1").remove();
+  document.querySelector(".screen2").style.display = "block";
+
+  for (let i = 0; i < numFloors - 1; i++) {
+    addFloor();
+  }
+
+  for (let i = 0; i < numLifts - 1; i++) {
+    addLift();
+  }
+});
+
 function main() {
   addCallLiftListeners(buttons);
   addFloorBtn.addEventListener("click", addFloor);
